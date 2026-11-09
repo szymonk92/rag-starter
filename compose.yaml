@@ -1,0 +1,5 @@
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    ports: ["5433:5432"]
+    environment: { POSTGRES_USER: rag, POSTGRES_PASSWORD: rag, POSTGRES_DB: rag }

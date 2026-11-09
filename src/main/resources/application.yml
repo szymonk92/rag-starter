@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/rag
+    username: rag
+    password: rag
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      chat.options: { model: llama3.2, temperature: 0.0 }
+      embedding.options.model: nomic-embed-text
+    vectorstore.pgvector:
+      initialize-schema: true
+      dimensions: 768          # nomic-embed-text; changing it means recreating the table
+      index-type: HNSW
+      distance-type: COSINE_DISTANCE
+app:
+  docs: classpath:docs/*.md
+  top-k: 4
+  min-similarity: 0.5

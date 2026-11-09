@@ -1,0 +1,13 @@
+# question	expected source	keyword the answer must contain (alternatives separated by |)
+How fast do I need to acknowledge a page?	on-call.md	15
+How much extra do I get for answering a page at 3am?	on-call.md	150
+Can I ship to production on Friday afternoon?	deploys.md	15:00
+What percentage of traffic does the canary get first?	deploys.md	5%
+When is the deployment freeze over Christmas?	deploys.md	December
+What counts as a SEV1?	incidents.md	pay
+How long do I have to write the postmortem?	incidents.md	five|5
+Who approves a 3,000 PLN conference ticket?	expenses.md	director
+How much can I spend on courses each year?	expenses.md	4,000
+How often must database passwords be rotated?	security.md	90
+Can I use production customer data for testing?	security.md	anonymised
+How many vacation days can I carry over?	leave.md	5
