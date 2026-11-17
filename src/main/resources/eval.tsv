@@ -11,3 +11,8 @@ How much can I spend on courses each year?	expenses.md	4,000
 How often must database passwords be rotated?	security.md	90
 Can I use production customer data for testing?	security.md	anonymised
 How many vacation days can I carry over?	leave.md	5
+# unanswerable: expected source "-", the answer must abstain (near-topic on purpose, so retrieval still returns chunks)
+How many days of parental leave do I get?	-	-
+What is the hotel limit per night on business trips?	-	-
+Which team is on call for the payments service this week?	-	-
+How long can a canary deploy stay at 50% before it must be promoted?	-	-

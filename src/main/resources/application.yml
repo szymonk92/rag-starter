@@ -17,3 +17,4 @@ app:
   docs: classpath:docs/*.md
   top-k: 4
   min-similarity: 0.5
+  allowed-hosts: acme.example   # OutputGuard keeps links/e-mails only to these hosts
