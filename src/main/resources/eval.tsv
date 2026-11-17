@@ -11,6 +11,10 @@ How much can I spend on courses each year?	expenses.md	4,000
 How often must database passwords be rotated?	security.md	90
 Can I use production customer data for testing?	security.md	anonymised
 How many vacation days can I carry over?	leave.md	5
+What is the formula for the error budget?	sla.md	SLO
+How is availability calculated?	sla.md	frac|good
+How many minutes of downtime does a 99.9% SLO allow per 30 days?	sla.md	43.2
+Is there a chart of the error budget burn-down?	sla.md	error-budget-burn.png
 # unanswerable: expected source "-", the answer must abstain (near-topic on purpose, so retrieval still returns chunks)
 How many days of parental leave do I get?	-	-
 What is the hotel limit per night on business trips?	-	-

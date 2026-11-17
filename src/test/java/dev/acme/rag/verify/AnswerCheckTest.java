@@ -47,4 +47,35 @@ class AnswerCheckTest {
         assertTrue(AnswerCheck.check("See [Deploys.md].", retrieved).grounded());
         assertTrue(AnswerCheck.check("See [docs/deploys.md].", retrieved).grounded());
     }
+
+    // ---- literal checks: numbers, formulas, image paths must come from the context ----
+    final String ctx = """
+            The error budget is $$EB = (1 - SLO) \\times T$$ for a 30-day window, 43.2 minutes at 99.9%.
+            ![Burn-down chart](img/error-budget-burn.png)
+            Conference tickets up to 2,500 PLN are approved by your manager.""";
+    final List<String> sla = List.of("sla.md");
+
+    AnswerCheck.Result lit(String q, String a) { return AnswerCheck.check(q, a, sla, ctx); }
+
+    @Test void verbatimLiteralsPass() {
+        var r = lit("What is the error budget?", "It is $$ EB = (1 - SLO)\\times T $$, i.e. 43.2 minutes at 99.9% [sla.md]. See ![chart](img/error-budget-burn.png).");
+        assertTrue(r.grounded(), r.issues().toString());
+    }
+
+    @Test void changedNumberIsFlagged() {
+        assertEquals(List.of("number not in context: 43.8"), lit("q", "About 43.8 minutes [sla.md].").issues());
+    }
+
+    @Test void numbersFromQuestionAndThousandSeparatorsAreFine() {
+        assertTrue(lit("Who approves a 3000 PLN ticket?", "Above 2500 PLN, so not the manager for 3,000 PLN [sla.md].").grounded());
+    }
+
+    @Test void alteredFormulaIsFlagged() {
+        var r = lit("q", "Use $EB = (1 + SLO) \\times T$ [sla.md].");
+        assertEquals(List.of("formula not in context: EB = (1 + SLO) \\times T"), r.issues());
+    }
+
+    @Test void inventedImagePathIsFlagged() {
+        assertEquals(List.of("image not in context: img/budget.png"), lit("q", "See img/budget.png [sla.md].").issues());
+    }
 }

@@ -51,17 +51,17 @@ public class EvalRunner implements CommandLineRunner {
             List<Document> hits = store.similaritySearch(SearchRequest.builder().query(f[0]).topK(topK).build());
             int rank = 0;
             for (int i = 0; i < hits.size(); i++) if (f[1].equals(hits.get(i).getMetadata().get("source"))) { rank = i + 1; break; }
-            String lower = a.answer().toLowerCase(Locale.ROOT);
+            String lower = (a.answer() + " " + a.images()).toLowerCase(Locale.ROOT); // image paths are returned beside the text
             // any of the |-separated keywords; ponytail: keyword match, use an LLM judge when answers get longer
             boolean ok = java.util.Arrays.stream(f[2].split("\\|")).anyMatch(k -> lower.contains(k.toLowerCase(Locale.ROOT)));
-            // grounded = every citation was retrieved, and the expected file is among them
+            // grounded = citations retrieved, literals (numbers, formulas, image paths) verbatim from context, expected file cited
             boolean citeOk = v.grounded() && !v.abstained() && v.cited().contains(f[1]);
             n++; if (rank == 1) hit1++; if (rank > 0) { hitK++; rr += 1.0 / rank; } if (ok) answered++; if (citeOk) cited++; if (v.abstained()) refusedWrongly++;
             System.out.printf("%-58s rank=%s answer=%s cite=%s%n", f[0], rank == 0 ? "-" : rank, ok ? "ok" : "MISS: " + oneLine,
                     citeOk ? "ok" : "BAD " + v.cited() + " " + v.issues());
         }
         System.out.printf(Locale.ROOT, "%nquestions=%d  hit@1=%d/%d  hit@%d=%d/%d  MRR=%.2f  answer-contains-keyword=%d/%d%n", n, hit1, n, topK, hitK, n, rr / n, answered, n);
-        System.out.printf(Locale.ROOT, "cited-correct-source=%d/%d  false-refusals=%d/%d  unanswerable-abstained=%d/%d%n", cited, n, refusedWrongly, n, abstained, neg);
+        System.out.printf(Locale.ROOT, "grounded-with-expected-source=%d/%d  false-refusals=%d/%d  unanswerable-abstained=%d/%d%n", cited, n, refusedWrongly, n, abstained, neg);
         System.exit(0);
     }
 }

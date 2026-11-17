@@ -25,7 +25,9 @@ public class AskController {
     record Question(String question) {}
     record Source(String source, double score) {}
     record Verification(boolean grounded, boolean abstained, List<String> cited, List<String> issues, List<String> removed) {}
-    record Answer(String answer, List<Source> sources, Verification verification) {}
+    record Image(String path, String caption, String source) {}
+    record Answer(String answer, List<Source> sources, List<Image> images, Verification verification) {}
+    private static final java.util.regex.Pattern MD_IMAGE = java.util.regex.Pattern.compile("!\\[([^\\]]*)]\\(([^)\\s]+)\\)");
 
     private final ChatClient chat;
     private final Ingestor ingestor;
@@ -43,7 +45,8 @@ public class AskController {
                 .queryAugmenter(ContextualQueryAugmenter.builder().documentFormatter(AskController::format).build())
                 .build();
         this.chat = builder
-                .defaultSystem("Answer only from the context. Cite the source file in square brackets, e.g. [deploys.md]. Be brief.")
+                .defaultSystem("Answer only from the context. Cite the source file in square brackets, e.g. [deploys.md]. "
+                        + "Copy numbers, LaTeX formulas and image paths exactly as written in the context. Be brief.")
                 .defaultAdvisors(rag)
                 .build();
     }
@@ -65,8 +68,12 @@ public class AskController {
         var sources = used.stream().map(d -> new Source((String) d.getMetadata().get("source"), d.getScore())).toList();
         // guard first (injected docs can make the model emit exfiltration links), then check citations against what was retrieved
         var guarded = guard.apply(r.chatResponse().getResult().getOutput().getText());
-        var c = AnswerCheck.check(guarded.text(), sources.stream().map(Source::source).toList());
+        String context = used.stream().map(Document::getText).collect(Collectors.joining("\n"));
+        var c = AnswerCheck.check(q.question(), guarded.text(), sources.stream().map(Source::source).toList(), context);
         // ponytail: flags, does not block; callers decide whether to show an ungrounded answer
-        return new Answer(guarded.text(), sources, new Verification(c.grounded(), c.abstained(), c.cited(), c.issues(), guarded.removed()));
+        // images come from the retrieved chunks, not from the model: models describe a picture but drop or garble its path
+        var images = used.stream().flatMap(d -> MD_IMAGE.matcher(d.getText()).results()
+                .map(m -> new Image(m.group(2), m.group(1), (String) d.getMetadata().get("source")))).distinct().toList();
+        return new Answer(guarded.text(), sources, images, new Verification(c.grounded(), c.abstained(), c.cited(), c.issues(), guarded.removed()));
     }
 }
